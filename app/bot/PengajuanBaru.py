@@ -1,0 +1,109 @@
+from app.helpers.Helpers import human_type, random_wait
+
+TUJUAN_PENGGUNAAN = "Untuk keperluan internal perusahaan (uji sampel kosmetika)."
+TUJUAN_PENDISTRIBUSIAN = "Distribusi ke cabang-cabang Shiseido di Indonesia (TESTING)."
+
+def isi_form_pengajuan_baru(page):
+    """Isi form pengajuan baru e-BPOM (setelah login dan navigasi)"""
+    print("📝 Mulai isi form pengajuan baru...")
+
+    try:
+        print("Mengisi Data Pemberitahuan...")
+        page.wait_for_selector("select#jenis_komoditi", timeout=10000)
+        print("Form Pengajuan Baru terdeteksi.")
+        random_wait(1.0, 1.8)
+
+        # Jenis Komoditi
+        page.wait_for_function(
+            """() => {
+                const el = document.querySelector('#jenis_komoditi');
+                return el && el.options.length > 5;
+            }""",
+            timeout=8000
+        )
+        page.select_option("#jenis_komoditi", value="12")
+        print("✅ Jenis Komoditi: Kosmetika (12)")
+        random_wait(1.0, 1.8)
+
+        # Jenis Dokumen
+        page.select_option("#jenis_dokumen", value="1")
+        print("✅ Jenis Dokumen: SKI (1)")
+        random_wait(0.8, 1.5)
+
+        # Jenis Surat
+        page.select_option("#jenis_sk", value="1")
+        print("✅ Jenis Surat: Surat Keterangan Impor (1)")
+        random_wait(0.8, 1.5)
+
+        # Kantor BPOM
+        page.click("#search_kantor_bpom")
+        random_wait(0.8, 1.2)
+        page.click("#src-kantor-bpom_1")
+        print("✅ Kantor BPOM dipilih.")
+
+        # Tujuan penggunaan & pendistribusian
+        human_type(page, "#tujuan_penggunaan", TUJUAN_PENGGUNAAN)
+        human_type(page, "#tujuan_pendistribusian", TUJUAN_PENDISTRIBUSIAN)
+        print("✅ Tujuan penggunaan & pendistribusian diisi.")
+        random_wait(0.8, 1.5)
+
+        # ======================
+        # FIELD 2: Data Importir
+        # ======================
+        print("Mengisi Data Importir...")
+        # Tambahkan sesuai kebutuhan kamu nanti
+
+        # ======================
+        # FIELD 3: Data Eksportir
+        # ======================
+        print("Mengisi Data Eksportir...")
+        page.click("#search_nama_eksportir")
+        random_wait(0.8, 1.2)
+        page.click("#src-eksportir_1")
+        print("✅ Nama Eksportir dipilih.")
+
+        # ======================
+        # FIELD 4: Data Pelabuhan dan Alat Angkut
+        # ======================
+        print("Mengisi Data Pelabuhan dan Alat Angkut...")
+        page.click("#search_pel_muat")
+        random_wait(0.8, 1.2)
+        page.click("#src-pelabuhan_1")
+        print("✅ Pelabuhan Muat dipilih.")
+
+        page.click("#search_pel_transit")
+        random_wait(0.8, 1.2)
+        page.click("#src-pelabuhan_2")
+        print("✅ Pelabuhan Transit dipilih.")
+
+        page.click("#search_pel_bongkar")
+        random_wait(0.8, 1.2)
+        page.click("#src-pelabuhan_1")
+        print("✅ Pelabuhan Bongkar dipilih.")
+
+        human_type(page, "#nama_angkut", "MAERSK LAUNCESTON")
+        human_type(page, "#no_angkut", "MAEU1234567")
+        random_wait(0.8, 1.2)
+        print("✅ Data Pelabuhan dan Alat Angkut diisi.")
+
+        # ======================
+        # KONFIRMASI & SUBMIT
+        # ======================
+        print("Menekan tombol submit form pengajuan...")
+        page.click("button#frm_pengajuan_baru_submit[type='submit']")
+        random_wait(1.0, 1.5)
+
+        # Tunggu popup konfirmasi "YA"
+        print("Menunggu popup konfirmasi...")
+        page.wait_for_selector("div.messi-box", timeout=8000)
+        print("Popup konfirmasi muncul.")
+
+        # Klik tombol YA
+        page.click("#btn_messi_1")
+        print("✅ Dikonfirmasi: YA (submit pengajuan dikirim).")
+
+        random_wait(2.0, 3.0)
+        print("🎯 Form pengajuan baru selesai dikirim.")
+
+    except Exception as e:
+        print(f"❌ Gagal isi form: {e}")
