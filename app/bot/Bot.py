@@ -2,20 +2,25 @@ from playwright.sync_api import sync_playwright
 import os, re, random, time
 from urllib.parse import urljoin
 from app.helpers.Helpers import random_wait, human_type
-from app.bot.PengajuanBaru import isi_form_pengajuan_baru
-from app.bot.PengisianDetilBarang import isi_detil_barang
+# from app.bot.PengajuanBaru import isi_form_pengajuan_baru
+# from app.bot.PengisianDetilBarang import isi_detil_barang
+from app.helpers.password_masked import get_password_masked
 
 EBPOM_URL = "https://e-bpom.pom.go.id/"
 
 def run(headless=False):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless, args=["--start-maximized"])
-        context = browser.new_context(viewport=None)
+        context = browser.new_context(no_viewport=True)
         page = context.new_page()
         page.goto(EBPOM_URL)
-        page.evaluate("document.body.style.zoom='0.9'")
-        print("Zoom ke 90%")
+        print("Membuka halaman e-BPOM...")
 
+        page.keyboard.down("Control")
+        for _ in range(7):  #
+            page.keyboard.press("-")
+            time.sleep(0.1)
+        page.keyboard.up("Control")
         # Tutup popup awal (jika ada)
         try:
             page.wait_for_selector("span.messi-closebtn", timeout=3000)
@@ -24,7 +29,8 @@ def run(headless=False):
         except:
             print("Tidak ada popup informasi.")
 
-        page.evaluate("document.body.style.zoom='1.0'")
+        page.evaluate("document.body.style.zoom='0.9'")
+        print("Zoom ke 90%")
 
         # Klik tombol login di menu utama
         try:
@@ -35,7 +41,7 @@ def run(headless=False):
             
         print("\n🪪 Silakan ketik username dan password Anda di sini:")
         USERNAME = input("Username: ").strip()
-        PASSWORD = input("Password: ").strip()
+        PASSWORD = get_password_masked("Password: ").strip()
 
         # Isi username & password
         try:
@@ -77,12 +83,12 @@ def run(headless=False):
         # Cek apakah login gagal
         if page.query_selector("div.messi-box"):
             msg = page.inner_text("div.messi-content").strip()
-            print(f"❌ Login gagal: {msg}")
+            print(f"Login gagal: {msg}")
             page.click("button#btn_messi_1")
             browser.close()
             return
 
-        print("✅ Login berhasil.")
+        print("Login berhasil.")
 
         # Navigasi ke Pengajuan Baru
         try:
@@ -91,17 +97,17 @@ def run(headless=False):
             page.click("a.icon.icon-mail:has-text('Pengajuan Impor')")
             random_wait(0.8, 1.2)
             page.click("a.icon.icon-mail[onclick*='frm-pengajuan.php']")
-            print("➡️ Masuk ke halaman Pengajuan Baru.")
+            print("Masuk ke halaman Pengajuan Baru.")
         except Exception as e:
             print("Gagal buka Pengajuan Baru:", e)
             browser.close()
             return
 
         # Jalankan form pengajuan
-        isi_form_pengajuan_baru(page)
+        # isi_form_pengajuan_baru(page)
         
         # Jalankan form Pengisian Detail
-        isi_detil_barang(page)
+        # isi_detil_barang(page)
 
         # # Logout
         # try:
@@ -130,7 +136,7 @@ def run(headless=False):
 
         time.sleep(10)
         browser.close()
-        print("🧹 Browser ditutup, sesi selesai.")
+        print("Browser ditutup, sesi selesai.")
 
 
 if __name__ == "__main__":

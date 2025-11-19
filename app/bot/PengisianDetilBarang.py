@@ -144,7 +144,7 @@ def isi_detil_barang(page):
             # tunggu hasil jml_harga muncul
             page.wait_for_selector(f"#jml_harga_{idx}", timeout=5000)
             
-            print(f"✅ Batch {idx} terisi: {batch}")
+            print(f"Batch {idx} terisi: {batch}")
             
             # hanya tambah batch baru jika ada batch berikutnya
             if idx < len(batch_data):
@@ -156,4 +156,4 @@ def isi_detil_barang(page):
 
     except Exception as e:
         print(f"Gagal isi detil barang: {e}")
-    print("🎯 Form detil barang selesai diisi.")
+    print("Form detil barang selesai diisi.")
